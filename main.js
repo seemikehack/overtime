@@ -366,28 +366,84 @@ function savePast() {
 }
 const dt = (t) =>
   new Date(t).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
-function renderHistory() {
-  $("#histWrap").style.display = past.length ? "block" : "none";
-  $("#history").innerHTML = past
-    .map(
-      (g, i) =>
-        '<button data-i="' +
-        i +
-        '"><b>' +
-        esc(g.name) +
-        "</b><small>" +
-        dt(g.start) +
-        " · " +
-        g.full +
-        " full turns · " +
-        g.players.length +
-        " players</small></button>",
-    )
-    .join("");
-  $$("#history button").forEach(
-    (b) => (b.onclick = () => showSummary(past[+b.dataset.i])),
+function histLabel(g) {
+  return (
+    "<b>" +
+    esc(g.name) +
+    "</b><small>" +
+    dt(g.start) +
+    " · " +
+    g.full +
+    " full turns · " +
+    g.players.length +
+    " players</small>"
   );
 }
+function renderHistory() {
+  $("#histWrap").style.display = past.length ? "block" : "none";
+  $("#history").innerHTML = past.length
+    ? '<button data-i="0">' + histLabel(past[0]) + "</button>"
+    : "";
+  const b = $("#history button");
+  if (b) b.onclick = () => showSummary(past[0]);
+  $("#allBtn").textContent =
+    past.length > 1
+      ? "View all past games (" + past.length + ")"
+      : "View all past games";
+}
+function renderAll() {
+  const l = $("#allList");
+  $("#clearAll").disabled = !past.length;
+  if (!past.length) {
+    l.innerHTML = '<p class="empty">No past games.</p>';
+    return;
+  }
+  l.innerHTML = past
+    .map(
+      (g) =>
+        '<div class="item"><button class="open" data-id="' +
+        g.id +
+        '">' +
+        histLabel(g) +
+        '</button><button class="del" data-id="' +
+        g.id +
+        '" aria-label="Delete game">🗑</button></div>',
+    )
+    .join("");
+  $$("#allList .open").forEach(
+    (b) =>
+      (b.onclick = () => showSummary(past.find((g) => g.id === +b.dataset.id))),
+  );
+  $$("#allList .del").forEach(
+    (b) =>
+      (b.onclick = () => {
+        const g = past.find((q) => q.id === +b.dataset.id);
+        if (!g) return;
+        ask('Delete "' + g.name + "\"? This can't be undone.", "Delete", () => {
+          past = past.filter((q) => q.id !== g.id);
+          savePast();
+          renderHistory();
+          renderAll();
+        });
+      }),
+  );
+}
+$("#allBtn").onclick = () => {
+  renderAll();
+  show("s3");
+};
+$("#back3").onclick = () => show("s1");
+$("#clearAll").onclick = () =>
+  ask(
+    "Delete all " + past.length + " past games? This can't be undone.",
+    "Clear all",
+    () => {
+      past = [];
+      savePast();
+      renderHistory();
+      renderAll();
+    },
+  );
 function showSummary(g) {
   $("#sumBody").innerHTML =
     "<p><b>" +

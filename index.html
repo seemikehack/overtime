@@ -45,8 +45,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       <div id="list"></div>
       <button id="add">+ Add player</button>
       <div id="histWrap" style="display: none">
-        <h2>Past games</h2>
+        <h2>Last Game</h2>
         <div id="history"></div>
+        <button id="allBtn">View all past games</button>
       </div>
       <div class="spacer"></div>
       <div class="foot">
@@ -98,6 +99,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       <div class="spacer"></div>
       <div class="foot">
         <button id="back2">Back</button><button class="primary" id="start">Start game</button>
+      </div>
+    </section>
+
+    <section class="screen" id="s3">
+      <header>
+        <h1>Past games</h1>
+        <button id="back3">Back</button>
+      </header>
+      <div id="allList"></div>
+      <div class="foot">
+        <button class="danger" id="clearAll" style="flex: 1">Clear all</button>
       </div>
     </section>
 

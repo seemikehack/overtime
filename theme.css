@@ -452,3 +452,41 @@ th:last-child {
   color: var(--muted);
   font-size: 14px;
 }
+
+/* Past games */
+#allBtn {
+  width: 100%;
+  margin-top: 8px;
+}
+#s3 {
+  overflow: hidden;
+}
+#allList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+#allList .item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+#allList .open {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+#allList .open small {
+  display: block;
+  color: var(--muted);
+  margin-top: 2px;
+}
+#allList .del {
+  color: var(--bad);
+  padding: 0 14px;
+}
+.empty {
+  color: var(--muted);
+  text-align: center;
+  margin-top: 24px;
+}
