@@ -196,6 +196,9 @@ button:disabled {
   font-size: 13px;
   color: var(--muted);
 }
+.field.solo {
+  flex: none;
+}
 .field div {
   display: flex;
   align-items: center;

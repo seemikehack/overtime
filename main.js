@@ -82,10 +82,13 @@ function renderList() {
   }
 }
 $("#add").onclick = () => {
-  if (players.length < 8) {
-    players.push({ id: ++uid, name: "" });
-    renderList();
-  }
+  if (players.length >= 8) return;
+  players.push({ id: ++uid, name: "" });
+  renderList();
+  const inputs = $$("#list .row input");
+  const last = inputs[inputs.length - 1];
+  last.focus();
+  last.scrollIntoView({ block: "nearest" });
 };
 renderList();
 $("#next1").onclick = () => show("s2");
