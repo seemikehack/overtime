@@ -522,3 +522,76 @@ th:last-child {
 .tog.flip > .b {
   display: inline-flex;
 }
+
+/* animated title sequence */
+#title-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: grid;
+  place-items: center;
+
+  background-color: black;
+  color: black;
+  opacity: 1;
+
+  font-family: "Cal Sans", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(2rem, 10vw, 8rem);
+  line-height: 1;
+  user-select: none;
+}
+
+#title-overlay > span {
+  visibility: hidden;
+}
+
+/* Start both overlay animations with one class. */
+#title-overlay.is-playing {
+  animation:
+    title-colors 600ms steps(1, end) forwards,
+    title-fade 600ms ease-in 1200ms forwards;
+}
+
+#title-overlay.is-playing > span {
+  animation: title-text 300ms steps(1, end) forwards;
+}
+
+@keyframes title-colors {
+  0% {
+    background-color: red;
+    color: red;
+  }
+
+  50% {
+    background-color: white;
+    color: red;
+  }
+
+  100% {
+    background-color: black;
+    color: white;
+  }
+}
+
+@keyframes title-text {
+  from {
+    visibility: hidden;
+  }
+
+  to {
+    visibility: visible;
+  }
+}
+
+@keyframes title-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}

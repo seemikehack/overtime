@@ -477,4 +477,42 @@ $("#sumDone").onclick = () => {
     show("s1");
   }
 };
+
+// title animation
+const overlay = $("#title-overlay");
+const app = $("#s1");
+
+function finishIntro() {
+  overlay.remove();
+  app.inert = false;
+}
+
+function startIntro() {
+  // Optional accessibility policy: skip this decorative intro
+  // when the user requests reduced motion.
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    finishIntro();
+    return;
+  }
+
+  // Block interaction with the controls underneath the overlay.
+  app.inert = true;
+
+  overlay.addEventListener("animationend", (event) => {
+    // Several animations finish, including the child's animation.
+    // Only the overlay's final fade should trigger cleanup.
+    if (
+      event.target === overlay &&
+      event.animationName === "title-fade"
+    ) {
+      finishIntro();
+    }
+  });
+
+  overlay.classList.add("is-playing");
+}
+
+startIntro();
+
+// this is the final rendering step before the app is usable
 renderHistory();
