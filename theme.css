@@ -484,9 +484,41 @@ th:last-child {
 #allList .del {
   color: var(--bad);
   padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
 }
 .empty {
   color: var(--muted);
   text-align: center;
   margin-top: 24px;
+}
+
+/* icons */
+.lucide {
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+  vertical-align: -0.2em;
+}
+.btns button,
+.foot button,
+#moreBtn,
+#add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.tog > .a,
+.tog > .b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tog > .b,
+.tog.flip > .a {
+  display: none;
+}
+.tog.flip > .b {
+  display: inline-flex;
 }

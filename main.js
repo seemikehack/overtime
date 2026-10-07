@@ -17,6 +17,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
+if (window.lucide) lucide.createIcons();
+const tpl = (n) => {
+  const c = $('#templates [data-tpl="' + n + '"]').cloneNode(true);
+  c.removeAttribute("data-tpl");
+  return c;
+};
 let uid = 0,
   theme = null;
 try {
@@ -68,15 +74,15 @@ function renderList() {
   }
   l.innerHTML = "";
   players.forEach((p, i) => {
-    const r = document.createElement("div");
-    r.className = "row";
+    const r = tpl("player");
     r.dataset.id = p.id;
-    r.innerHTML = `<button class="handle" aria-label="Drag to reorder">⠿</button><input maxlength="20" placeholder="Player ${i + 1}" value="">${players.length > 2 ? '<button class="x" aria-label="Remove">✕</button>' : ""}`;
     const inp = r.querySelector("input");
+    inp.placeholder = "Player " + (i + 1);
     inp.value = p.name;
     inp.oninput = () => (p.name = inp.value);
     const x = r.querySelector(".x");
-    if (x)
+    if (players.length <= 2) x.remove();
+    else
       x.onclick = () => {
         players = players.filter((q) => q !== p);
         renderList();
@@ -160,7 +166,7 @@ $("#moreBtn").onclick = () => {
     o = m.style.display === "none";
   m.style.display = o ? "grid" : "none";
   $("#customWrap").style.display = o ? "block" : "none";
-  $("#moreBtn").textContent = "More options " + (o ? "▴" : "▾");
+  $("#moreBtn").classList.toggle("flip", o);
 };
 function readCustom() {
   const m = Math.max(0, Math.min(999, parseFloat($("#cMin").value) || 0)),
@@ -259,7 +265,7 @@ function render() {
     )
     .join("");
   $$("#strip .chip b").forEach((b, i) => (b.textContent = G.ps[i].name));
-  $("#pauseBtn").textContent = G.run ? "⏸ Pause" : "▶ Resume";
+  $("#pauseBtn").classList.toggle("flip", !G.run);
 }
 function advance() {
   if (!G || !G.run) return;
@@ -290,18 +296,7 @@ function renderAdjust() {
   const a = $("#adjust");
   a.innerHTML = "";
   G.ps.forEach((p, i) => {
-    const d = document.createElement("div");
-    d.className = "adj";
-    d.innerHTML =
-      '<span class="nm"></span><span class="tm"></span>' +
-      [
-        ["−1m", -60],
-        ["−10s", -10],
-        ["+10s", 10],
-        ["+1m", 60],
-      ]
-        .map(([l, s]) => `<button data-s="${s}">${l}</button>`)
-        .join("");
+    const d = tpl("adjust");
     d.querySelector(".nm").textContent = p.name;
     d.querySelector(".tm").textContent = fmt(p.ms);
     d.querySelectorAll("button").forEach(
@@ -337,8 +332,6 @@ function ask(msg, label, fn) {
     fn();
   };
 }
-const esc = (t) =>
-  t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
 $("#restart").onclick = () =>
   ask("Restart the game with fresh clocks?", "Restart", () => {
     G.ps.forEach((p) => {
@@ -366,26 +359,26 @@ function savePast() {
 }
 const dt = (t) =>
   new Date(t).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
-function histLabel(g) {
-  return (
-    "<b>" +
-    esc(g.name) +
-    "</b><small>" +
+function fillLabel(el, g) {
+  el.querySelector(".gn").textContent = g.name;
+  el.querySelector("small").textContent =
     dt(g.start) +
     " · " +
     g.full +
     " full turns · " +
     g.players.length +
-    " players</small>"
-  );
+    " players";
 }
 function renderHistory() {
   $("#histWrap").style.display = past.length ? "block" : "none";
-  $("#history").innerHTML = past.length
-    ? '<button data-i="0">' + histLabel(past[0]) + "</button>"
-    : "";
-  const b = $("#history button");
-  if (b) b.onclick = () => showSummary(past[0]);
+  $("#history").replaceChildren(
+    ...past.slice(0, 1).map((g) => {
+      const b = tpl("history");
+      fillLabel(b, g);
+      b.onclick = () => showSummary(g);
+      return b;
+    }),
+  );
   $("#allBtn").textContent =
     past.length > 1
       ? "View all past games (" + past.length + ")"
@@ -395,37 +388,27 @@ function renderAll() {
   const l = $("#allList");
   $("#clearAll").disabled = !past.length;
   if (!past.length) {
-    l.innerHTML = '<p class="empty">No past games.</p>';
+    const p = document.createElement("p");
+    p.className = "empty";
+    p.textContent = "No past games.";
+    l.replaceChildren(p);
     return;
   }
-  l.innerHTML = past
-    .map(
-      (g) =>
-        '<div class="item"><button class="open" data-id="' +
-        g.id +
-        '">' +
-        histLabel(g) +
-        '</button><button class="del" data-id="' +
-        g.id +
-        '" aria-label="Delete game">🗑</button></div>',
-    )
-    .join("");
-  $$("#allList .open").forEach(
-    (b) =>
-      (b.onclick = () => showSummary(past.find((g) => g.id === +b.dataset.id))),
-  );
-  $$("#allList .del").forEach(
-    (b) =>
-      (b.onclick = () => {
-        const g = past.find((q) => q.id === +b.dataset.id);
-        if (!g) return;
+  l.replaceChildren(
+    ...past.map((g) => {
+      const it = tpl("past"),
+        open = it.querySelector(".open");
+      fillLabel(open, g);
+      open.onclick = () => showSummary(g);
+      it.querySelector(".del").onclick = () =>
         ask('Delete "' + g.name + "\"? This can't be undone.", "Delete", () => {
           past = past.filter((q) => q.id !== g.id);
           savePast();
           renderHistory();
           renderAll();
         });
-      }),
+      return it;
+    }),
   );
 }
 $("#allBtn").onclick = () => {
@@ -445,32 +428,22 @@ $("#clearAll").onclick = () =>
     },
   );
 function showSummary(g) {
-  $("#sumBody").innerHTML =
-    "<p><b>" +
-    esc(g.name) +
-    '</b><br><small style="color:var(--muted)">' +
-    dt(g.start) +
-    " → " +
-    dt(g.end) +
-    "</small></p>" +
-    "<p>Full turns: <b>" +
-    g.full +
-    '</b> <span style="color:var(--muted)">(' +
-    g.turns +
-    " turns taken)</span></p><table><tr><th>Player</th><th>Ending time</th></tr>" +
-    g.players
-      .map(
-        (p) =>
-          "<tr><td>" +
-          esc(p.name) +
-          '</td><td class="' +
-          (p.ms < 0 ? "ot" : "") +
-          '">' +
-          fmt(p.ms) +
-          "</td></tr>",
-      )
-      .join("") +
-    "</table>";
+  const s = tpl("summary");
+  s.querySelector(".gn").textContent = g.name;
+  s.querySelector(".from").textContent = dt(g.start);
+  s.querySelector(".to").textContent = dt(g.end);
+  s.querySelector(".full").textContent = g.full;
+  s.querySelector(".turns").textContent = g.turns;
+  s.querySelector(".rows").replaceChildren(
+    ...g.players.map((p) => {
+      const r = tpl("summary-row");
+      r.children[0].textContent = p.name;
+      r.children[1].textContent = fmt(p.ms);
+      r.children[1].classList.toggle("ot", p.ms < 0);
+      return r;
+    }),
+  );
+  $("#sumBody").replaceChildren(s);
   $("#summary").classList.add("on");
 }
 $("#end").onclick = () =>

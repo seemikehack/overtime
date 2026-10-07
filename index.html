@@ -43,7 +43,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       </label>
       <h2 style="margin-top: 4px">Players</h2>
       <div id="list"></div>
-      <button id="add">+ Add player</button>
+      <button id="add"><i data-lucide="user-round-plus"></i>Add player</button>
       <div id="histWrap" style="display: none">
         <h2>Last Game</h2>
         <div id="history"></div>
@@ -65,7 +65,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       <h2>Quick picks</h2>
       <div class="grid" id="quick"></div>
       <h2>More options</h2>
-      <button id="moreBtn" style="width: 100%">More options ▾</button>
+      <button id="moreBtn" class="tog" style="width: 100%"><span class="a">More options <i data-lucide="chevron-down"></i></span><span class="b">More options <i
+            data-lucide="chevron-up"></i></span></button>
       <div class="grid" id="more" style="display: none; margin-top: 8px"></div>
       <div id="customWrap" style="display: none">
         <h2>Custom control</h2>
@@ -120,7 +121,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
       <div class="mid">
         <div class="strip" id="strip"></div>
         <div class="btns">
-          <button id="pauseBtn">⏸ Pause</button><button id="setBtn">⚙ Settings</button>
+          <button id="pauseBtn" class="tog"><span class="a"><i data-lucide="pause"></i>Pause</span><span class="b"><i
+                data-lucide="play"></i>Resume</span></button><button id="setBtn"><i data-lucide="settings"></i>Settings</button>
         </div>
       </div>
       <div class="zone bottom" id="zBot" role="button" tabindex="0">
@@ -172,7 +174,38 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         </div>
       </div>
     </div>
+    <!-- Hidden templates: kept in the DOM so lucide.createIcons() converts their icons once; main.js clones them via tpl(name). -->
+    <div id="templates" hidden>
+      <div class="row" data-tpl="player">
+        <button class="handle" aria-label="Drag to reorder"><i data-lucide="grip-vertical"></i></button>
+        <input maxlength="20" value />
+        <button class="x" aria-label="Remove"><i data-lucide="x"></i></button>
+      </div>
+      <div class="adj" data-tpl="adjust">
+        <span class="nm"></span><span class="tm"></span>
+        <button data-s="-60">−1m</button><button data-s="-10">−10s</button><button data-s="10">+10s</button><button data-s="60">+1m</button>
+      </div>
+      <div class="item" data-tpl="past">
+        <button class="open"><b class="gn"></b><small></small></button>
+        <button class="del" aria-label="Delete game"><i data-lucide="trash-2"></i></button>
+      </div>
+      <button data-tpl="history"><b class="gn"></b><small></small></button>
+      <div data-tpl="summary">
+        <p><b class="gn"></b><br /><small style="color: var(--muted)"><span class="from"></span> <i data-lucide="arrow-right"></i> <span
+              class="to"></span></small></p>
+        <p>Full turns: <b class="full"></b> <span style="color: var(--muted)">(<span class="turns"></span> turns taken)</span></p>
+        <table>
+          <thead><tr><th>Player</th><th>Ending time</th></tr></thead>
+          <tbody class="rows"></tbody>
+        </table>
+      </div>
+      <table><tbody>
+          <tr data-tpl="summary-row"><td></td><td></td></tr>
+        </tbody></table>
+    </div>
+    <!-- Load the Lucide CDN script here, before main.js -->
     <script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.1.3/build/umd/index.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="main.js"></script>
   </body>
 </html>
