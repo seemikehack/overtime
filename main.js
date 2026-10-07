@@ -55,10 +55,16 @@ $$(".themesel button").forEach(
 );
 applyTheme();
 
+const placeholders = ["Agricola", "Harmonies", "Wingspan", "Dominion", "General Orders"];
+function generatePlaceholder() {
+  $("#gameName").setAttribute("placeholder","e.g. " + placeholders[Math.floor(Math.random()*placeholders.length)]);
+}
 function show(id) {
   $$(".screen,#play").forEach((e) => e.classList.remove("on"));
   $("#" + id).classList.add("on");
+  id === "s1" && generatePlaceholder();
 }
+generatePlaceholder();
 
 /* ---- Players list ---- */
 let players = [

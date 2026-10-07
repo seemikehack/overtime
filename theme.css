@@ -536,16 +536,17 @@ th:last-child {
   color: black;
   opacity: 1;
 
-  font-family: "Cal Sans", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-  font-size: clamp(2rem, 10vw, 8rem);
   line-height: 1;
   user-select: none;
 }
 
 #title-overlay > span {
   visibility: hidden;
+  font-family: "Cal Sans", sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  font-size: clamp(4rem, 10vw, 8rem);
+  text-align: center;
 }
 
 /* Start both overlay animations with one class. */
