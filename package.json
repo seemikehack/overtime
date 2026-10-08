@@ -4,6 +4,7 @@
   "description": "Multiplayer game clock for chess-like time controls",
   "license": "GPL-3.0-or-later",
   "author": "Michael Atkinson <seemikehack@gmail.com>",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "npx prettier . --write && node format.mjs"
