@@ -32,9 +32,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <section class="screen on" id="s1">
       <header>
         <h1>New game</h1>
-        <div class="seg themesel">
-          <button data-th="light"><i data-lucide="sun"></i></button><button data-th="dark"><i data-lucide="moon"></i></button>
-        </div>
+        <button class="icon" id="prefsBtn1" aria-label="Settings"><i data-lucide="sliders-horizontal"></i></button>
       </header>
       <label class="field solo" style="margin-bottom: 12px">Game name
         <div>
@@ -60,9 +58,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <section class="screen" id="s2">
       <header>
         <h1>Time control</h1>
-        <div class="seg themesel">
-          <button data-th="light"><i data-lucide="sun"></i></button><button data-th="dark"><i data-lucide="moon"></i></button>
-        </div>
+        <button class="icon" id="prefsBtn2" aria-label="Settings"><i data-lucide="sliders-horizontal"></i></button>
       </header>
       <h2>Quick picks</h2>
       <div class="grid" id="quick"></div>
@@ -124,7 +120,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <div class="strip" id="strip"></div>
         <div class="btns">
           <button id="pauseBtn" class="tog"><span class="a"><i data-lucide="pause"></i>Pause</span><span class="b"><i
-                data-lucide="play"></i>Resume</span></button><button id="setBtn"><i data-lucide="settings"></i>Settings</button>
+                data-lucide="play"></i>Resume</span></button><button id="setBtn"><i data-lucide="sliders-horizontal"></i>Settings</button>
         </div>
       </div>
       <div class="zone bottom" id="zBot" role="button" tabindex="0">
@@ -147,6 +143,34 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
         <h2>Game</h2>
         <div class="foot" style="margin-top: 0">
           <button id="restart" style="flex: 1">Restart</button><button id="end" class="danger" style="flex: 1">End Game</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="prefs">
+      <div class="sheet">
+        <header>
+          <h1>Settings</h1>
+          <button id="prefsDone" class="primary">Done</button>
+        </header>
+        <h2>Theme</h2>
+        <div class="seg themesel">
+          <button data-th="light"><i data-lucide="sun"></i></button><button data-th="dark"><i data-lucide="moon"></i></button>
+        </div>
+        <h2>Extras</h2>
+        <label class="setting">
+          <span class="lbl">More Joy<small>Turn on the extra touches.</small></span>
+          <span class="switch"><input type="checkbox" data-pref="joy" /><span class="track"></span></span>
+        </label>
+        <div id="joyExtras" hidden>
+          <label class="setting">
+            <span class="lbl">Eye Candy<small>Flashing title animation. Skip this if you're sensitive to flashing lights.</small></span>
+            <span class="switch"><input type="checkbox" data-pref="candy" /><span class="track"></span></span>
+          </label>
+          <label class="setting">
+            <span class="lbl">Ear Worms<small>Play sounds when you tap the clock.</small></span>
+            <span class="switch"><input type="checkbox" data-pref="ears" /><span class="track"></span></span>
+          </label>
         </div>
       </div>
     </div>

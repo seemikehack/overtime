@@ -22,9 +22,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // Storage keys
 const HK = "mpc-history";
+const SK = "mpc-settings";
 
 // Static data
-const placeholders = ["Agricola", "Harmonies", "Wingspan", "Dominion", "General Orders"];
+const placeholders = [
+  "Agricola",
+  "Harmonies",
+  "Wingspan",
+  "Dominion",
+  "General Orders",
+];
 const quick = [
   [3, 2],
   [5, 5],
@@ -51,6 +58,9 @@ const app = $("#s1");
 
 // Theme (resolved during initialization)
 let theme = null;
+
+// Preferences (loaded during initialization)
+let settings = { joy: false, candy: false, ears: false };
 
 // Player setup
 let uid = 0;
@@ -122,6 +132,49 @@ function setTheme(t) {
     localStorage.setItem("mpc-theme", t);
   } catch (e) {}
   applyTheme();
+}
+
+/* ---- Preferences ---- */
+
+// Load preferences from storage (everything defaults to off).
+function loadSettings() {
+  const s = { joy: false, candy: false, ears: false };
+  try {
+    const saved = JSON.parse(localStorage.getItem(SK));
+    if (saved && typeof saved === "object")
+      for (const k in s) s[k] = saved[k] === true;
+  } catch (e) {}
+  return s;
+}
+
+// Persist preferences to storage.
+function saveSettings() {
+  try {
+    localStorage.setItem(SK, JSON.stringify(settings));
+  } catch (e) {}
+}
+
+// Eye Candy and Ear Worms only take effect while More Joy is on.
+function eyeCandyOn() {
+  return settings.joy && settings.candy;
+}
+function earWormsOn() {
+  return settings.joy && settings.ears;
+}
+
+// Placeholder sound handler, called when a play-screen button is tapped.
+// `name` is one of "turn", "pause", "resume", or "settings".
+function playSound(name) {
+  if (!earWormsOn()) return;
+  // TODO: play the sound for `name`.
+}
+
+// Sync the preferences modal with the current settings.
+function renderPrefs() {
+  $$("#prefs input[data-pref]").forEach(
+    (i) => (i.checked = settings[i.dataset.pref]),
+  );
+  $("#joyExtras").hidden = !settings.joy;
 }
 
 /* ---- Navigation ---- */
@@ -247,6 +300,7 @@ function nm(p, i) {
 // Deduct elapsed time from the current player and alert on overtime.
 function tick() {
   if (!G || !G.run) return;
+  G.fade = 500;
   const now = performance.now(),
     p = G.ps[G.cur];
   p.ms -= now - G.last;
@@ -256,11 +310,12 @@ function tick() {
     try {
       navigator.vibrate && navigator.vibrate([300, 150, 300]);
     } catch (e) {}
-    [$("#zTop"), $("#zBot")].forEach((z) => {
-      z.classList.remove("flash");
-      void z.offsetWidth;
-      z.classList.add("flash");
-    });
+    if (eyeCandyOn())
+      [$("#zTop"), $("#zBot")].forEach((z) => {
+        z.classList.remove("flash");
+        void z.offsetWidth;
+        z.classList.add("flash");
+      });
   }
   render();
 }
@@ -274,6 +329,8 @@ function render() {
     z.querySelector(".t").textContent = fmt(p.ms);
     z.classList.toggle("over", p.ms < 0);
     z.classList.toggle("paused", !G.run);
+    z.classList.toggle("fade", !eyeCandyOn());
+    z.style.setProperty("--fade", G.fade + "ms");
   });
   $("#strip").innerHTML = G.ps
     .map(
@@ -290,9 +347,12 @@ function advance() {
   if (!G || !G.run) return;
   tick();
   const p = G.ps[G.cur];
+  playSound("turn");
+  const wasOver = p.ms < 0;
   p.ms += G.inc * 1000;
   if (p.ms >= 0) p.warned = false;
   G.cur = (G.cur + 1) % G.ps.length;
+  G.fade = wasOver && G.ps[G.cur].ms >= 0 ? 250 : 500;
   G.turns++;
   try {
     navigator.vibrate && navigator.vibrate(15);
@@ -364,7 +424,10 @@ function savePast() {
 
 // Format a timestamp for display.
 function dt(t) {
-  return new Date(t).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+  return new Date(t).toLocaleString([], {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 // Fill a history entry's name and details.
@@ -470,12 +533,18 @@ function startIntro() {
   overlay.addEventListener("animationend", (event) => {
     // Several animations finish, including the child's animation.
     // Only the overlay's final fade should trigger cleanup.
-    if (event.target === overlay && event.animationName === "title-fade") {
+    if (
+      event.target === overlay &&
+      (event.animationName === "title-fade" ||
+        event.animationName === "gentle-fade")
+    ) {
       finishIntro();
     }
   });
 
-  overlay.classList.add("is-playing");
+  // Eye Candy gets the original flashing sequence; everyone else
+  // gets the gentle fade.
+  overlay.classList.add(eyeCandyOn() ? "is-playing" : "is-gentle");
 }
 
 /* ========================================================================
@@ -483,7 +552,27 @@ function startIntro() {
  * ====================================================================== */
 
 // Theme toggle buttons.
-$$(".themesel button").forEach((b) => (b.onclick = () => setTheme(b.dataset.th)));
+$$(".themesel button").forEach(
+  (b) => (b.onclick = () => setTheme(b.dataset.th)),
+);
+
+// Preferences modal: open from the setup screens, close with Done.
+$("#prefsBtn1").onclick = $("#prefsBtn2").onclick = () => {
+  renderPrefs();
+  applyTheme();
+  $("#prefs").classList.add("on");
+};
+$("#prefsDone").onclick = () => $("#prefs").classList.remove("on");
+
+// Preference toggles.
+$$("#prefs input[data-pref]").forEach(
+  (i) =>
+    (i.onchange = () => {
+      settings[i.dataset.pref] = i.checked;
+      saveSettings();
+      renderPrefs();
+    }),
+);
 
 // Add a player and focus its input.
 $("#add").onclick = () => {
@@ -533,6 +622,7 @@ $("#start").onclick = () => {
     name: $("#gameName").value.trim() || "Untitled game",
     start: Date.now(),
     last: performance.now(),
+    fade: 500,
   };
   show("play");
   render();
@@ -551,10 +641,14 @@ $("#start").onclick = () => {
 $("#zTop").onclick = $("#zBot").onclick = advance;
 
 // Pause or resume the clock.
-$("#pauseBtn").onclick = () => setRun(!G.run);
+$("#pauseBtn").onclick = () => {
+  playSound(G.run ? "pause" : "resume");
+  setRun(!G.run);
+};
 
 // Open settings and pause the clock.
 $("#setBtn").onclick = () => {
+  playSound("settings");
   wasRunning = G.run;
   setRun(false);
   renderAdjust();
@@ -648,8 +742,10 @@ $("#sumDone").onclick = () => {
 
 if (window.lucide) lucide.createIcons();
 theme = resolveInitialTheme();
+settings = loadSettings();
 past = loadPast();
 applyTheme();
+renderPrefs();
 generatePlaceholder();
 renderList();
 fill($("#quick"), quick);
